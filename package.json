@@ -1,0 +1,20 @@
+{
+  "name": "time-with-god",
+  "version": "0.0.1",
+  "description": "An application for facilitating time with God.",
+  "scripts": {
+    "test": "echo \"No test framework setup\"",
+    "start": "node src/server/start.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kennyheaton/time-with-god.git"
+  },
+  "author": "Kenny Heaton",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kennyheaton/time-with-god/issues"
+  },
+  "homepage": "https://github.com/kennyheaton/time-with-god#readme",
+  "devDependencies": {}
+}
