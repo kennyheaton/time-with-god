@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
-const apis = require("./apis");
+const { passage } = require("./bible");
+const readingPlan = require('./readingPlan');
+
 
 const mimeTypes = {
   ".js": "text/javascript",
@@ -11,73 +13,89 @@ const mimeTypes = {
   ".webmanifest": "application/manifest+json",
 };
 
-function requestListener(request, response) {
+function return404(response) {
+  response.writeHead(404, {
+    "Content-Type": "text/html",
+  });
+
+  response.end(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Hello</title></head><body><main><h1>404</h1></main></body></html>`);
+}
+
+function return500(response, error) {
+  response.writeHead(500, {
+    "Content-Type": "text/html",
+  });
+
+  console.log(error);
+  response.end(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Hello</title></head><body><main><h1>500</h1><p>${error}</p></main></body></html>`);
+}
+
+function isFileWithReadAccess(filePath) {
+  return new Promise(function (resolve, reject) {
+    fs.access(filePath, fs.constants.R_OK, function (err) {
+      if (err) {
+        resolve(false);
+      } else {
+        resolve(true);
+      }
+    });
+  });
+}
+
+function getFileSize(filePath) {
+  return new Promise(function (resolve, reject) {
+    fs.stat(filePath, (err, stats) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stats.size);
+      }
+    });
+  });
+}
+
+function streamToResponse(filePath, response) {
+  fs.createReadStream(filePath).pipe(response);
+}
+
+async function requestListener(request, response) {
   const url = request.url === "/" ? "index.html" : request.url.substring(1);
 
   console.log(`Request: ${url}`);
+
   if (url.indexOf("api/") === 0) {
-    const [_, mod, func] = url.split("/");
-    const api = apis?.[mod]?.[func]?.[request.method.toLowerCase()];
-    if (typeof api === "function") {
-      if ((request.method === "GET" || request.method === "DELETE")) {
-        const result = JSON.stringify(api());
-        response.writeHead(200, {
-          "Content-Type": "application/json",
-          "Content-Length": result.length,
-        });
-        response.end(result);
-      } else if (request.method === "POST" || request.method === "PUT") {
-        let data = "";
-        request.on("data", function (chunk) {
-          data += chunk;
-        });
-        request.on("end", function () {
-          const param = JSON.parse(data);
-          const result = JSON.stringify(api(param));
-          response.writeHead(200, {
-            "Content-Type": "application/json",
-            "Content-Length": result.length,
-          });
-          response.end(result);
-        });
-      }
+
+    if (url === 'api/todays-reading') {
+      const message = await passage(readingPlan.getTodayRef());
+
+      response.writeHead(200, {
+        "Content-Type": 'text/html'
+      });
+
+      message.pipe(response);
+
+    } else {
+      return404(response);
     }
   } else {
     try {
       const filePath = `src/public/${url}`;
-      fs.access(filePath, fs.constants.R_OK, (err) => {
-        if (err) {
-          response.writeHead(404, {
-            "Content-Type": "text/html",
-          });
+      if (await isFileWithReadAccess(filePath)) {
+        
+        const size = await getFileSize(filePath);
 
-          response.write(
-            `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Hello</title></head><body><main><h1>404</h1></main></body></html>`
-          );
-          response.end();
-          return;
-        }
-
-        fs.stat(filePath, (err, stats) => {
-          if (err) {
-            console.log(err);
-          }
-
-          response.writeHead(200, {
-            "Content-Type": mimeTypes[path.extname(url)],
-            "Content-Length": stats.size,
-          });
-
-          const readStream = fs.createReadStream(filePath);
-
-          readStream.pipe(response);
+        response.writeHead(200, {
+          "Content-Type": mimeTypes[path.extname(url)],
+          "Content-Length": size,
         });
-      });
+
+        streamToResponse(filePath, response);
+
+      } else {
+        return404(response);
+      }
     } catch (error) {
-      console.log(error);
-      response.write(
-        `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Hello</title></head><body><main><h1>500</h1><p>${error}</p></main></body></html>`
-      );
+      return500(response, error);
     }
   }
 }

@@ -1,23 +1,37 @@
-async function getGreeting() {
-  const response = await fetch('/api/greeting/hello')
-  return response.json();
+let request = new XMLHttpRequest();
+
+request.addEventListener("progress", function() {
+  console.log(`Progres: ${request.responseText.length}`)
+  setInnerHtml('reading', request.responseText);
+});
+request.addEventListener("loadend", function() {
+  console.log(`Done: ${request.responseText.length}`)
+  setInnerHtml('reading', request.responseText);
+});
+
+request.open('GET', '/api/todays-reading');
+request.responseType = 'text/html';
+
+request.send();
+
+
+const cache = {};
+let loaded = false;
+function setInnerHtml(id, text) {
+  if (loaded) {
+    document.getElementById(id).innerHTML = text;
+  } else {
+    cache[id] = text;
+  }
 }
 
-async function updateGreeting(greeting) {
-  await fetch('/api/greeting/hello', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: `{ "message": "${greeting}" }`
+function dumpCache() {
+  Object.keys(cache).forEach(function(key) {
+    document.getElementById(key).innerHTML = cache[key];
   });
 }
 
-document.addEventListener('DOMContentLoaded',(async function() {
-  document.getElementById('click').addEventListener('click', async function() {
-    await updateGreeting(document.getElementById('update').value);
-    document.getElementById('update').value = '';
-    document.getElementById('greeting').innerHTML = (await getGreeting()).message;
-  });
-  document.getElementById('greeting').innerHTML = (await getGreeting()).message;
-}));
+document.addEventListener('DOMContentLoaded',function() {
+  loaded = true;
+  dumpCache();
+});

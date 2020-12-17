@@ -16,5 +16,7 @@
     "url": "https://github.com/kennyheaton/time-with-god/issues"
   },
   "homepage": "https://github.com/kennyheaton/time-with-god#readme",
-  "devDependencies": {}
+  "dependencies": {
+    "pg": "^8.5.1"
+  }
 }
