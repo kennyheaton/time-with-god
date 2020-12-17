@@ -1,4 +1,5 @@
 const http = require('http');
+const Transform = require('stream').Transform;
 
 exports.passage = function(ref) {
     return new Promise(function (resolve, reject) {

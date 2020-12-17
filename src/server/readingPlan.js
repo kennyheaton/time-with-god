@@ -10,7 +10,7 @@ const plan = [
     [],
     [],
     [],
-    ['','','','','','','','','','','','','','','','','Revelation.15','Revelation.16','Revelation.17','Revelation.18','Revelation.19','Revelation.20','Revelation.21','Revelation.22','Luke.1','Luke.2','Luke.3','Psalms.84-85','Proverbs.18','Psalms.86-88','Psalms.86-90','Luke.4']
+    ['','','','','','','','','','','','','','','','Revelation.15','Revelation.16;Joel.1','Revelation.17;Joel.2','Revelation.18;Joel.3','Revelation.19','Revelation.20','Revelation.21','Revelation.22','Luke.1','Luke.2','Luke.3','Psalms.84-85','Proverbs.18','Psalms.86-88','Psalms.86-90','Luke.4']
 ]
 
 const readingPlan = {
