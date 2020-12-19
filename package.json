@@ -4,7 +4,7 @@
   "description": "An application for facilitating time with God.",
   "scripts": {
     "test": "echo \"No test framework setup\"",
-    "start": "node src/server/start.js"
+    "start": "node src/server/app.mjs"
   },
   "repository": {
     "type": "git",
@@ -16,7 +16,5 @@
     "url": "https://github.com/kennyheaton/time-with-god/issues"
   },
   "homepage": "https://github.com/kennyheaton/time-with-god#readme",
-  "dependencies": {
-    "pg": "^8.5.1"
-  }
+  "dependencies": {}
 }
